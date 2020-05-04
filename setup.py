@@ -37,7 +37,7 @@ setup(name='CGST',
       license='GPLv3',
       packages=["cgst"],
       include_package_data=True,
-      install_requires=['Bio'],
+      install_requires=['biopython', 'pandas'],
       entry_points={"console_scripts": ['cgst = cgst.CGST:run']},
       zip_safe=False,
       python_requires='>=3.6')

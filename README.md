@@ -45,9 +45,9 @@ In this analysis,
 
 ## Requirements
 
-CGST assumes that you have [MentaLiST](https://github.com/lh3/miniasm) and R installed and available in your PATH. If you can run `mentalist -v` and `R --version` on the command line, you should be good to go!
+CGST assumes that you have [MentaLiST](https://github.com/lh3/miniasm), [julia](https://julialang.org/downloads/) and [R](https://cran.r-project.org/) installed and available in your PATH. If you can run `mentalist -v` and `R --version` on the command line, you should be good to go!
 
-You'll need Python 3.6 or later to run CGST (check with `python3 --version`). The only Python package requirement is [Biopython](https://biopython.org/wiki/Download). If you don't already have this package, it will be installed as part of the CGST installation process.
+You'll need Python 3.6 or later to run CGST (check with `python3 --version`). The Python package requirement are [Biopython](https://biopython.org/wiki/Download) and [pandas](https://pypi.org/project/pandas/). If you don't already have this package, it will be installed as part of the CGST installation process.
 
 You'll need R 3.6 or later to run CGST (check with `R --version`). The R package requirement are [optparse](https://cran.r-project.org/web/packages/optparse/index.html), [questionr](https://cran.r-project.org/web/packages/questionr/index.html), [cluster](https://cran.r-project.org/web/packages/cluster/index.html) and [fastcluster](https://cran.r-project.org/web/packages/fastcluster/index.html).
 
@@ -81,7 +81,7 @@ git clone https://github.com/CNRResistanceAntibiotic/CGST.git
 CGST/CGST.py -h
 ```
 
-If you run CGST this way, it's up to you to make sure that [Biopython](https://biopython.org/wiki/Download) is installed for your Python.
+If you run CGST this way, it's up to you to make sure that [Biopython](https://biopython.org/wiki/Download) and [pandas](https://pypi.org/project/pandas/) are installed for your Python environment.
 
 
 ## Method

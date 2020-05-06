@@ -47,16 +47,20 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
     exe_update = shutil.which("update_fasta_db.py")
 
     cgmlst_database_path = os.path.join(database, "cgMLST", f"{species}")
-    db_path = os.path.join(cgmlst_database_path, f"{species}_cgmlst.db")
-    fasta_db_path = ""
+
+    fasta_db_path = db_path = ""
     output_final = os.path.join(work_dir_path, f"{name}_output_final")
 
-    for file in os.listdir(cgmlst_database_path):
-        file_path = os.path.join(cgmlst_database_path, file)
-        if ".db" in file and "_fasta" not in file and not os.path.isdir(file_path):
-            db_path = file_path
-        elif ".db" not in file and "_fasta" in file and os.path.isdir(file_path):
-            fasta_db_path = file_path
+    for file_1 in os.listdir(cgmlst_database_path):
+        if "cgmlst-org" == file_1 or "cnr" == file_1:
+            file_1_path = os.path.join(cgmlst_database_path, file_1)
+            db_path = os.path.join(file_1_path, f"{species}_cgmlst.db")
+            for file_2 in os.listdir(file_1_path):
+                file_2_path = os.path.join(file_1_path, file_2)
+                if ".db" in file_2 and "_fasta" not in file_2 and not os.path.isdir(file_2_path):
+                    db_path = file_2_path
+                elif ".db" not in file_2 and "_fasta" in file_2 and os.path.isdir(file_2_path):
+                    fasta_db_path = file_2_path
 
     # If the kmer index database do not exist -> create it
     if not os.path.exists(db_path):
@@ -66,6 +70,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
         explanation('Before run a detection MentaLiST need to construct his own kmer-index database')
         # prepare
         cmd = f"{exe} build_db --db {db_path} -k {kmer_build} -d {fasta_db_path} --threads {threads}"
+        print(cmd)
         log_message = f"Command used : \n {cmd}"
         # launch
         log_file_path = os.path.join(work_dir_path, "logBuildDB.txt")

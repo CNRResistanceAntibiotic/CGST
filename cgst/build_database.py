@@ -41,9 +41,9 @@ def build_database_mentalist(cgst_database_path, species_full, threads):
     if not os.path.exists(cgmlst_database_path):
         os.mkdir(cgmlst_database_path)
 
-    cgmlst_species_database_path = os.path.join(cgmlst_database_path, species)
-    if not os.path.exists(cgmlst_species_database_path):
-        os.mkdir(cgmlst_species_database_path)
+    cgmlst_species_base_path = os.path.join(cgmlst_database_path, species)
+    if not os.path.exists(cgmlst_species_base_path):
+        os.mkdir(cgmlst_species_base_path)
     else:
         log(f"cgMLST for {species_full} already present")
 
@@ -53,17 +53,20 @@ def build_database_mentalist(cgst_database_path, species_full, threads):
     df = pandas.read_csv(url, error_bad_lines=False)
 
     url_folder = ""
+    sub_folder = ""
     for i, row in enumerate(df["Species"]):
         if row == species_full:
             log("Species {0} found in CNR GitHub".format(species_full))
             url_folder = "https://github.com/CNRResistanceAntibiotic/core_genomes/trunk/{0}/{1}"\
                 .format(df["Name"][i], df["Sub-folder"][i])
+            sub_folder = df["Sub-folder"][i]
         else:
             continue
-
+    id_species_list = []
     if url_folder:
+        cgmlst_species_database_path = os.path.join(cgmlst_species_base_path, sub_folder)
         cmd = f"svn export {url_folder} {cgmlst_species_database_path} --force"
-        print(cmd)
+
         # launch
         process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
         while True:
@@ -73,6 +76,7 @@ def build_database_mentalist(cgst_database_path, species_full, threads):
                 error = process.stderr.readline().decode("utf-8").rstrip()
             if output == '' and process.poll() is not None:
                 break
+
     else:
         id_species_list = available_species_mentalist(species_full)
         if not id_species_list:
@@ -83,6 +87,14 @@ def build_database_mentalist(cgst_database_path, species_full, threads):
         else:
             for id_species in id_species_list:
                 log(f"ID ({id_species.lower()}) found for {species_full} ")
+
+        cgmlst_species_database_path = os.path.join(cgmlst_species_base_path, "cgmlst-org")
+
+        if not os.path.exists(cgmlst_species_database_path):
+            os.mkdir(cgmlst_species_database_path)
+        else:
+            log(f"cgMLST for {species_full} already present")
+
         ###################################
         # Run MentaLiST Build Species Database
         section_header(f'MentaLiST Build database cgMLST for species : {species_full}')
@@ -95,8 +107,13 @@ def build_database_mentalist(cgst_database_path, species_full, threads):
         database_name = f"{species}_cgmlst.db"
         database_path = os.path.join(cgmlst_species_database_path, database_name)
 
+
+
         cmd = f"{exe} download_cgmlst -k 31 -o {fasta_database_path} -s {id_species_list[0].lower()} --db {database_path}" \
               f" --threads {threads}"
+
+        print(cmd)
+
         # launch
         process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
         log_process(process, "")

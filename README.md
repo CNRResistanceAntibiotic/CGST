@@ -33,28 +33,35 @@ CGST contains for each species cgMLST a list of combinations alleles and the com
 
 #### Analysis
 
-Analysis part of CGST consist to classify, summarize and compare the information provides by the detection part of CGST of a set of strains base on the same core-genome.
+Analysis part of CGST consist to classify, summarize and compare the information provides by the detection part of CGST in a set of strains base on the same core-genome.
 
 * The classification step consist to regroup the strains by their alleles difference on a numeric scale.
 
 * The summarize step consist to get the alignment of the allele difference provide by [MAFFT](https://mafft.cbrc.jp/alignment/software/) then use [Gubbins](https://github.com/sanger-pathogens/gubbins) to remove the recombination SNP and get a SNP alignment. This alignment is use with [RaXML-ng](https://github.com/amkozlov/raxml-ng) to build the more accurate possible phylotree.  
 
-In this analysis, 
-
-
 
 ## Requirements
 
-CGST assumes that you have [MentaLiST](https://github.com/lh3/miniasm), [julia](https://julialang.org/downloads/) and [R](https://cran.r-project.org/) installed and available in your PATH. If you can run `mentalist -v` and `R --version` on the command line, you should be good to go!
+CGST assumes that you have [MentaLiST](https://github.com/lh3/miniasm), [julia](https://julialang.org/downloads/)(for MentaliST), [Gubbins](https://github.com/sanger-pathogens/gubbins) - available by `run_gubbins` instead of `run_gubbins.py` , [RaXML-ng](https://github.com/amkozlov/raxml-ng), [MAFFT](https://mafft.cbrc.jp/alignment/software/) and [R](https://cran.r-project.org/) installed and available in your PATH. If you can run `mentalist -v`, `julia -v`, `run_gubbins --version`, `mafft`, `raxml-ng --version` and `R --version` on the command line, you should be good to go!
 
 You'll need Python 3.6 or later to run CGST (check with `python3 --version`). The Python package requirement are [Biopython](https://biopython.org/wiki/Download) and [pandas](https://pypi.org/project/pandas/). If you don't already have this package, it will be installed as part of the CGST installation process.
 
 You'll need R 3.6 or later to run CGST (check with `R --version`). The R package requirement are [optparse](https://cran.r-project.org/web/packages/optparse/index.html), [questionr](https://cran.r-project.org/web/packages/questionr/index.html), [cluster](https://cran.r-project.org/web/packages/cluster/index.html) and [fastcluster](https://cran.r-project.org/web/packages/fastcluster/index.html).
 
+### Help for installation dependencies / Or use Singularity
+
+You can follow the installation of the dependencies in the Singularity of CGST available on the repository.
+
+Or you can build your own Singularity image by:
+
+```bash
+sudo singularity build CGST.simg Singularity
+singularity exec CGST.simg cgst
+```
 
 ## Installation
 
-### Install from source
+ Install from source
 
 You can install CGST using [pip](https://pypi.org/project/pip/), either from a local copy:
 ```bash
@@ -180,8 +187,14 @@ This folder contains:
 This folder contains:
  - The file `similarity_matrix.tsv` is the similarity matrix of the relevant locus of strains. 
  - The file `dendrogram_with_class.pdf` is the dendrogram that represent the 3 more relevant classification class of strains.
+ 
+  <p align="center"><img src="images/dendrogram.png" alt="Dendrogram" width="600"></p>
+ 
  - The file `groups.tsv` is the classification class by strains for each of groups of the 3 class.
  - The file `inertial_graph.pdf` is the inertial class curve produce by the `hclust` R package.
+ 
+ <p align="center"><img src="images/inertial.png" alt="Inertial graph" width="600"></p>
+ 
  - The file `logR.txt` is the log file of the R script `r_script.R`.
  - The file `groups_alleles.tsv` is classification of the strains, the alleles share by all strains and the alleles share more than 90% of the strains for each groups class and class.
 

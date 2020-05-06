@@ -410,12 +410,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     # Gubbins
     section_header(f'Delete Recombination with Gubbins {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
-    if shutil.which("run_gubbins") is not None:
-        ex_gubbins = shutil.which("run_gubbins")
-    elif shutil.which("gubbins"):
-        ex_gubbins = shutil.which("gubbins")
-    else:
-        print("Error Gubbins Not Found")
+    ex_gubbins = shutil.which("run_gubbins")
 
     gubbins_work_dir = os.path.join(phylotree_dir, "gubbins")
 

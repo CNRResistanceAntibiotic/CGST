@@ -31,6 +31,8 @@ The [MentaLiST](https://github.com/WGS-TB/MentaLiST) output is enhanced by other
 
 CGST contains for each species cgMLST a list of combinations alleles and the combination found in the strain are stored in the `combination_result.tsv` file. 
 
+The detection CGST part has a high memory consumption (MentaLiST consumption). More than 16Go with the `Escherichia coli` core-genome. 
+
 #### Analysis
 
 Analysis part of CGST consist to classify, summarize and compare the information provides by the detection part of CGST in a set of strains base on the same core-genome.
@@ -85,7 +87,7 @@ CGST can also be run directly from its repository by using the `CGST.py` script,
 
 ```bash
 git clone https://github.com/CNRResistanceAntibiotic/CGST.git
-CGST/CGST.py -h
+CGST/cgst/cgst.py -h
 ```
 
 If you run CGST this way, it's up to you to make sure that [Biopython](https://biopython.org/wiki/Download) and [pandas](https://pypi.org/project/pandas/) are installed for your Python environment.

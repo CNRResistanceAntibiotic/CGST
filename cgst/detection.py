@@ -235,7 +235,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
             for row in reader:
                 known_comb_dict[row["Name"]] = row["Combination"]
     else:
-        explanation(f"combination file not found for {species_full}")
+        explanation(f"combination file not found for {species_full} at {known_comb_path}")
 
     # Search For Known Combination
     final_file_path = os.path.join(work_dir_path, f"{name}_output_final")

@@ -48,15 +48,15 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
 
     cgmlst_database_path = os.path.join(database, "cgMLST", f"{species}")
 
-    fasta_db_path = db_path = ""
+    fasta_db_path = db_path = cgmlst_dir_path = ""
     output_final = os.path.join(work_dir_path, f"{name}_output_final")
 
     for file_1 in os.listdir(cgmlst_database_path):
         if "cgmlst-org" == file_1 or "cnr" == file_1:
-            file_1_path = os.path.join(cgmlst_database_path, file_1)
-            db_path = os.path.join(file_1_path, f"{species}_cgmlst.db")
-            for file_2 in os.listdir(file_1_path):
-                file_2_path = os.path.join(file_1_path, file_2)
+            cgmlst_dir_path = os.path.join(cgmlst_database_path, file_1)
+            db_path = os.path.join(cgmlst_dir_path, f"{species}_cgmlst.db")
+            for file_2 in os.listdir(cgmlst_dir_path):
+                file_2_path = os.path.join(cgmlst_dir_path, file_2)
                 if ".db" in file_2 and "_fasta" not in file_2 and not os.path.isdir(file_2_path):
                     db_path = file_2_path
                 elif ".db" not in file_2 and "_fasta" in file_2 and os.path.isdir(file_2_path):
@@ -70,7 +70,6 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
         explanation('Before run a detection MentaLiST need to construct his own kmer-index database')
         # prepare
         cmd = f"{exe} build_db --db {db_path} -k {kmer_build} -d {fasta_db_path} --threads {threads}"
-        print(cmd)
         log_message = f"Command used : \n {cmd}"
         # launch
         log_file_path = os.path.join(work_dir_path, "logBuildDB.txt")
@@ -225,7 +224,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
         csv_writer.writerow(["None Locus", count_none, (count_none / count_loc * 100)])
 
     # Load Known Combination
-    known_comb_path = os.path.join(cgmlst_database_path, "combination_list.tsv")
+    known_comb_path = os.path.join(cgmlst_dir_path, "combination_list.tsv")
 
     known_comb_dict = {}
 

@@ -26,7 +26,7 @@ from shutil import rmtree
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
-from cgst.log import section_header, log_process_with_output_file, explanation
+from cgst.log import section_header, log_process_with_output_file, explanation, tool_error_log
 from cgst.utils import read_output_mentalist
 
 
@@ -67,6 +67,12 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
             file_path = os.path.join(detection_dir, file)
             detection_result_dict_tmp = read_output_mentalist(file_path, strain_name)
             detection_result_dict_list.append(detection_result_dict_tmp)
+
+    if len(detection_result_dict_list) >= 5:
+        pass
+    else:
+        tool_error_log(f"Need more strains that just {len(detection_result_dict_list)}")
+        exit()
 
     for detect_dict in detection_result_dict_list:
         for key, value_dict in detect_dict.items():
@@ -327,6 +333,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
                 seq = record_dict[f"{locus_name}_{number_allele}"]
                 seq.id = sample_name
                 SeqIO.write(seq, output_fasta, "fasta")
+            record_dict.close()
 
         ###################################
         # MAFFT - MSA

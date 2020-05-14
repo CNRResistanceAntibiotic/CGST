@@ -166,6 +166,8 @@ The outputs are constitute by :
 
 Create a folder for analysis and copy the output final CGST files of the wanted strains.
 
+The analysis can only done on 5 strains or more.
+
 ```
 mkdir analysis_CGST
 cp /detection_folder_output/detection_*/*_output_final analysis_CGST

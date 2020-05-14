@@ -283,7 +283,19 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     ###################################
     # Create Multi fasta
     section_header(f'Create Multiple Fasta Files {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
-    db_path = os.path.join(database, "cgMLST", f"{species}", f"{species}_cgmlst_fasta")
+
+    cgmlst_database_path = os.path.join(database, "cgMLST", f"{species}")
+
+    fasta_db_path = cgmlst_dir_path = ""
+
+    for file_1 in os.listdir(cgmlst_database_path):
+        if "cgmlst-org" == file_1 or "cnr" == file_1:
+            cgmlst_dir_path = os.path.join(cgmlst_database_path, file_1)
+            for file_2 in os.listdir(cgmlst_dir_path):
+                file_2_path = os.path.join(cgmlst_dir_path, file_2)
+                if ".db" not in file_2 and "_fasta" in file_2 and os.path.isdir(file_2_path):
+                    fasta_db_path = file_2_path
+
     output_dir_msa = os.path.join(phylotree_dir, "msa")
     if not os.path.exists(output_dir_msa):
         os.mkdir(output_dir_msa)
@@ -295,7 +307,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     sequence_dict = {}
     final_resume_aln_dict = {}
     count_locus_cg = 0
-    for file in os.listdir(db_path):
+    for file in os.listdir(fasta_db_path):
         if ".fasta" in file:
             count_locus_cg += 1
     sema = multiprocessing.Semaphore(int(threads))
@@ -303,9 +315,9 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     output_aln_file_list = []
     for locus_name, sample_dict in detection_result_only_diff_dict.items():
         fasta_file = ""
-        for file in os.listdir(db_path):
+        for file in os.listdir(fasta_db_path):
             if file == f"{locus_name}.fasta":
-                fasta_file = os.path.join(db_path, f"{locus_name}.fasta")
+                fasta_file = os.path.join(fasta_db_path, f"{locus_name}.fasta")
                 break
 
         output_fasta_file = os.path.join(output_dir_msa, os.path.basename(fasta_file))
@@ -318,9 +330,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
 
         ###################################
         # MAFFT - MSA
-
         output_aln_file = os.path.join(output_dir_msa, f"{os.path.basename(fasta_file).split('.')[0]}.aln")
-
         output_aln_file_list.append(output_aln_file)
 
         p = multiprocessing.Process(

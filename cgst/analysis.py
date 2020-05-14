@@ -20,6 +20,8 @@ import shutil
 from subprocess import Popen, PIPE, STDOUT
 from collections import Counter
 from datetime import datetime
+
+import psutil
 from itertools import combinations
 from shutil import rmtree
 
@@ -325,7 +327,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
             if file == f"{locus_name}.fasta":
                 fasta_file = os.path.join(fasta_db_path, f"{locus_name}.fasta")
                 break
-
+        print(fasta_file)
         output_fasta_file = os.path.join(output_dir_msa, os.path.basename(fasta_file))
         with open(output_fasta_file, "w") as output_fasta:
             record_dict = SeqIO.index(fasta_file, "fasta")
@@ -334,6 +336,8 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
                 seq.id = sample_name
                 SeqIO.write(seq, output_fasta, "fasta")
             record_dict.close()
+
+        print(output_fasta_file)
 
         ###################################
         # MAFFT - MSA
@@ -507,4 +511,6 @@ def mafft(output_dir_msa, output_fasta_file, locus_name, output_aln_file, sema):
     while True:
         if process.poll() is not None:
             break
+    process.stdout.close()
+    process.stderr.close()
     sema.release()

@@ -21,7 +21,6 @@ from subprocess import Popen, PIPE, STDOUT
 from collections import Counter
 from datetime import datetime
 
-import psutil
 from itertools import combinations
 from shutil import rmtree
 

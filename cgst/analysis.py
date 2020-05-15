@@ -345,7 +345,6 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
 
         list_jobs.append([output_dir_msa, output_fasta_file, locus_name, output_aln_file])
 
-    print(list_jobs)
     pool.starmap(mafft, list_jobs)
 
     stop = 0

@@ -348,8 +348,10 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
         jobs.append(p)
         #p.start()
 
+
     # wait multiple jobs
     for job in jobs:
+        print(job)
         job.start()
         job.join()
 
@@ -500,10 +502,11 @@ def mafft(output_dir_msa, output_fasta_file, locus_name, output_aln_file, sema):
     sema.acquire()
     ex_mafft = shutil.which("mafft")
     cmd = f"{ex_mafft} {output_fasta_file} > {output_aln_file}"
-    log_message = f"Command used : \n {cmd}\n"
+    # log_message = f"Command used : \n {cmd}\n"
     # launch
-    process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
-    log_file_path = os.path.join(output_dir_msa, f"logMAFFT_{locus_name}.txt")
+    # process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+    process = Popen(cmd, shell=True)
+    # log_file_path = os.path.join(output_dir_msa, f"logMAFFT_{locus_name}.txt")
     # log_process_with_output_file(process, log_message, log_file_path)
     while True:
         if process.poll() is not None:

@@ -56,6 +56,9 @@ From: julia:1
 	locale-gen en_US.UTF-8
     echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
 
+    # set ulimit
+    ulimit -Sn 10000
+
 	cd /usr/local
 
     # Install Julia

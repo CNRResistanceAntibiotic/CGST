@@ -21,7 +21,6 @@ from subprocess import Popen, PIPE, STDOUT
 from collections import Counter
 from datetime import datetime
 
-import psutil
 from itertools import combinations
 from shutil import rmtree
 
@@ -318,10 +317,12 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     for file in os.listdir(fasta_db_path):
         if ".fasta" in file:
             count_locus_cg += 1
-    sema = multiprocessing.Semaphore(int(threads))
-    jobs = []
+
     output_aln_file_list = []
-    print(detection_result_only_diff_dict)
+
+    pool = multiprocessing.Pool(processes=int(threads))
+    list_jobs = []
+
     for locus_name, sample_dict in detection_result_only_diff_dict.items():
         fasta_file = ""
         for file in os.listdir(fasta_db_path):
@@ -342,25 +343,10 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
         output_aln_file = os.path.join(output_dir_msa, f"{os.path.basename(fasta_file).split('.')[0]}.aln")
         output_aln_file_list.append(output_aln_file)
 
-        p = multiprocessing.Process(
-            target=mafft,
-            args=(output_dir_msa, output_fasta_file, locus_name, output_aln_file, sema),
-            name=f'mafft {locus_name}'
-        )
-        jobs.append(p)
-        #p.start()
+        list_jobs.append([output_dir_msa, output_fasta_file, locus_name, output_aln_file])
 
-
-
-    print(jobs)
-
-    # wait multiple jobs
-    for job in jobs:
-        proc = psutil.Process()
-        print(proc.open_files())
-        print(job)
-        job.start()
-        job.join()
+    print(list_jobs)
+    pool.starmap(mafft, list_jobs)
 
     stop = 0
     for output_aln_file in output_aln_file_list:
@@ -497,26 +483,22 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
             writer_report.writerow([name_lvl, ";".join(str(v) for v in lvl_dict["list_sample"])])
 
 
-def mafft(output_dir_msa, output_fasta_file, locus_name, output_aln_file, sema):
+def mafft(output_dir_msa, output_fasta_file, locus_name, output_aln_file):
     """
     This function call MAFFT tool
     :param output_dir_msa: The MSA directory path
     :param output_fasta_file: The fasta file path
     :param locus_name: The locus name
     :param output_aln_file: The MSA output directory path
-    :param sema: The multiprocessing.Semaphore object
     """
-    sema.acquire()
     ex_mafft = shutil.which("mafft")
     cmd = f"{ex_mafft} {output_fasta_file} > {output_aln_file}"
     # log_message = f"Command used : \n {cmd}\n"
     # launch
-    # process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
-    process = Popen(cmd, shell=True)
+    process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
     # log_file_path = os.path.join(output_dir_msa, f"logMAFFT_{locus_name}.txt")
     # log_process_with_output_file(process, log_message, log_file_path)
     while True:
         if process.poll() is not None:
             break
 
-    sema.release()

@@ -56,9 +56,6 @@ From: julia:1
 	locale-gen en_US.UTF-8
     echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
 
-    # set ulimit
-    ulimit -Sn 10000
-
 	cd /usr/local
 
     # Install Julia
@@ -79,6 +76,8 @@ From: julia:1
 	python3 -m pip install wheel
 	python3 -m pip install --upgrade pip
     python3 -m pip install --upgrade setuptools
+
+    python3 -m pip install --upgrade psutil
 
 	# INSTALL ARIBA
 

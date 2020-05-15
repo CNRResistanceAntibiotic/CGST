@@ -21,6 +21,7 @@ from subprocess import Popen, PIPE, STDOUT
 from collections import Counter
 from datetime import datetime
 
+import psutil
 from itertools import combinations
 from shutil import rmtree
 
@@ -320,6 +321,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     sema = multiprocessing.Semaphore(int(threads))
     jobs = []
     output_aln_file_list = []
+    print(detection_result_only_diff_dict)
     for locus_name, sample_dict in detection_result_only_diff_dict.items():
         fasta_file = ""
         for file in os.listdir(fasta_db_path):
@@ -349,8 +351,13 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
         #p.start()
 
 
+
+    print(jobs)
+
     # wait multiple jobs
     for job in jobs:
+        proc = psutil.Process()
+        print(proc.open_files())
         print(job)
         job.start()
         job.join()

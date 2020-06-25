@@ -268,6 +268,8 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
                     comment = "Close"
                 elif ratio >= 80:
                     comment = "Like"
+                elif ratio >= 70:
+                    comment = "Close Like"
                 else:
                     comment = "No relevant"
                 csv_writer.writerow([name_comb, len(combination_known), len(result), ratio, comment])

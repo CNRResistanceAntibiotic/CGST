@@ -147,7 +147,8 @@ The outputs are constitute by :
     - 100>Ratio>98  -> `Very Close`
     - 98>Ratio>90  -> `Close`
     - 90>Ratio>80  -> `Like`
-    - 80>Ratio>0  -> `No relevant`
+    - 80>Ratio>70  -> `Close Like`
+    - 70>Ratio>0  -> `No relevant`
  
  - `my_ecoli_output_final` file contains CGST final results.
  - `statistics.tsv` file contains the CGST statistics.

@@ -198,10 +198,12 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     section_header(f'Create Group {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
     r_result_file = os.path.join(combination_dir, "groups.tsv")
     groups_dict = {}
+    strains_groups_list = []
     with open(r_result_file, "r") as groups_file:
         reader = DictReader(groups_file, delimiter="\t")
         headers = reader.fieldnames
         for row in reader:
+            strains_groups_list.append(row[""])
             for head in headers:
                 if head:
                     if head in groups_dict:
@@ -225,6 +227,10 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
                     else:
                         groups_dict[head] = [{"group": row[head], "strains": [row[""]]}]
                         continue
+
+    strains_groups_list = list(set(strains_groups_list))
+    groups_dict["1"] = [{"group": "1", "strains": strains_groups_list}]
+
     ###################################
     # Add allele to group
     for key_class, list_value in groups_dict.items():
@@ -243,7 +249,9 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
                     allele_tmp_list = []
                     for strain in group["strains"]:
                         allele_tmp_list.append(sample_dict[strain])
+                    #######
                     unique = list(Counter(allele_tmp_list).keys())  # equals to list(set(words))
+
                     value = list(Counter(allele_tmp_list).values())
                     if len(unique) == 1:
                         share_strict_allele_list.append({"locus": key, "allele": unique[0]})

@@ -325,7 +325,10 @@ def check_mentalist_output(fasta_novel_st, output, fasta_db_path):
     false_novel_allele_dict = {}
     with open(fasta_corrected, "w") as output_handle:
         for record in SeqIO.parse(fasta_novel_st, "fasta"):
-            locus = record.id.split("_")[0]
+            locus_list = record.id.split("_")
+            # remove comment id to get the identifier file
+            locus_list.pop()
+            locus = "_".join(locus_list)
             for file in os.listdir(fasta_db_path):
                 if locus in file:
                     locus_file_path = os.path.join(fasta_db_path, file)

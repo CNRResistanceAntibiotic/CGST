@@ -9,7 +9,7 @@
 Bootstrap: docker
 
 # Set the base image to Ubuntu
-From: julia:1
+From: julia:1.4.1
 
 %labels
     Maintainer Aurélien BIRER <abirer@chu-clermontferrand.fr>
@@ -63,7 +63,7 @@ From: julia:1
     export PATH=/usr/local/julia/bin:$PATH
 
     # Install packages for MentaLiST
-    julia -e 'using Pkg;pkg"add JSON Distributed ArgParse BioSequences DataStructures JLD GZip Blosc FileIO TextWrap LightXML;precompile"'
+    julia -e 'using Pkg;pkg"add JSON Distributed ArgParse BioSequences@1.1.0 DataStructures JLD GZip Blosc FileIO TextWrap LightXML;precompile"'
 
     chown -R root:users /opt/.julia
     chmod -R 777 /opt

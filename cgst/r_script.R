@@ -116,3 +116,31 @@ typo_gap = data.matrix(typo_gap)
 # add columnnames
 colnames(typo_gap) = c(gap_k)
 write.table(typo_gap, file = sprintf("%s/groups_gap.tsv", opt$wd), quote = FALSE, sep = '\t', col.names = c('', gap_k))
+
+##########
+# Get Groups by Kmean Class
+final <- kmeans(simi_matrix, ndx[1], nstart = 30)
+pdf(sprintf("%s/kmean_%s_clusters.pdf", opt$wd, ndx[1]))
+fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", ndx[1], "clusters"))
+invisible(dev.off())
+
+##########
+# Get Groups by Kmean Class
+final <- kmeans(simi_matrix, ndx[2], nstart = 30)
+pdf(sprintf("%s/kmean_%s_clusters.pdf", opt$wd, ndx[2]))
+fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", ndx[2], "clusters"))
+invisible(dev.off())
+
+##########
+# Get Groups by Kmean Class
+final <- kmeans(simi_matrix, ndx[3], nstart = 30)
+pdf(sprintf("%s/kmean_%s_clusters.pdf", opt$wd, ndx[3]))
+fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", ndx[3], "clusters"))
+invisible(dev.off())
+
+##########
+# Get Groups by Kmean-GAP Class
+final <- kmeans(simi_matrix, gap_k, nstart = 30)
+pdf(sprintf("%s/kmean_%s_clusters.pdf", opt$wd, gap_k))
+fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", gap_k, "clusters"))
+invisible(dev.off())

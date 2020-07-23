@@ -113,6 +113,8 @@ From: julia:1.4.1
 	R -e "install.packages('questionr')"
 	R -e "install.packages('cluster')"
 	R -e "install.packages('fastcluster')"
+	R -e "install.packages('factoextra')"
+	R -e "install.packages('cowplot')"
 
 	# INSTALL MAFFT
     apt-get install --no-install-recommends -y mafft

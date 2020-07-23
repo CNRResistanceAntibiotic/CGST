@@ -26,6 +26,11 @@ library(questionr)
 library(cluster)
 library(fastcluster, warn.conflicts = FALSE)
 
+# clustering
+library(factoextra)
+# plot grid
+library(cowplot)
+
 ################################ 
 
 # Parse args
@@ -60,25 +65,54 @@ for (i in 1 : n) {
 }
 ndx <- sort(order(l, decreasing = T)[1 : 3])
 
+####
+# get gap cluster
+disi_matrix_gap <- scale(disi_matrix)
+gap_stat <- clusGap(disi_matrix_gap, FUN = kmeans, nstart = 30, K.max = 24, B = 200)
+gap_k = maxSE(f = gap_stat$Tab[, "gap"], SE.f = gap_stat$Tab[, "SE.sim"])
+
 #########
 # Get Inertie Graph
 pdf(sprintf("%s/inertial_graph.pdf", opt$wd))
 plot(inertie[1 : n], type = "s", xlab = "Number of class", ylab = "Inertia", main = sprintf("Inertial Graph (3 best inertia)", ndx[1], ndx[2], ndx[3]),)
 points(c(ndx[1], ndx[2], ndx[3]), inertie[c(ndx[1], ndx[2], ndx[3])], col = c("green3", "red3", "blue3"), cex = 2, lwd = 3)
-legend("topright", bty = "n", legend = paste(ndx[1 : 3], " class"), text.col = c("green3", "red3", "blue3"), cex = .8)
+legend("topright", bty = "n", legend = paste(ndx[1 : 3], " class"), text.col = c("green3", "red3", "blue3"), cex = 0.8)
 invisible(dev.off())
+
+#########
+# Get Gap Graph
+pdf(sprintf("%s/gap_statistics.pdf", opt$wd))
+fviz_gap_stat(gap_stat) + theme_minimal() + ggtitle("fviz_gap_stat: Gap Statistic")
+invisible(dev.off())
+
 
 #####
 # Get Dendrogram Graph
 pdf(sprintf("%s/dendrogram_with_class.pdf", opt$wd))
-plot(arbre_ward, main = sprintf("Dendrogram partionned (3 best inertie)", ndx[1], ndx[2], ndx[3]), xlab = "", ylab = "", sub = "", axes = FALSE, hang = - 1)
-legend("topright", bty = "n", legend = paste(ndx[1 : 3], " class"), text.col = c("green3", "red3", "blue3"), cex = .8)
+plot(arbre_ward, main = sprintf("Dendrogram partionned (3 best inertie)", ndx[1], ndx[2], ndx[3]), xlab = "", ylab = "", sub = "", axes = FALSE, hang = - 1, cex = 0.6)
+legend("topright", bty = "n", legend = paste(ndx[1 : 3], " class"), text.col = c("green3", "red3", "blue3"), cex = 0.8)
 rect.hclust(arbre_ward, ndx[1], border = "green3")
 rect.hclust(arbre_ward, ndx[2], border = "red3")
 rect.hclust(arbre_ward, ndx[3], border = "blue3")
+invisible(dev.off())
+
+#####
+# Get Dendrogram Gap Graph
+pdf(sprintf("%s/dendrogram_with_class_gap.pdf", opt$wd))
+plot(arbre_ward, main = sprintf("Dendrogram partionned with gap stat(", gap_k,"clusters)"), xlab = "", ylab = "", sub = "", axes = FALSE, hang = - 1, cex = 0.6)
+rect.hclust(arbre_ward, gap_k, border = 2:5)
 invisible(dev.off())
 
 ##########
 # Get Groups by Inertie Class
 typo <- cutree(arbre_ward, k = c(ndx[1], ndx[2], ndx[3]))
 write.table(typo, file = sprintf("%s/groups.tsv", opt$wd), quote = FALSE, sep = '\t', col.names = NA)
+
+##########
+# Get Groups by Gap Class
+typo_gap <- cutree(arbre_ward, k = gap_k)
+# convert to matrix format
+typo_gap = data.matrix(typo_gap)
+# add columnnames
+colnames(typo_gap) = c(gap_k)
+write.table(typo_gap, file = sprintf("%s/groups_gap.tsv", opt$wd), quote = FALSE, sep = '\t', col.names = c('', gap_k))

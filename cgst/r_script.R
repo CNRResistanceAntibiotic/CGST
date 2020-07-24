@@ -115,7 +115,7 @@ typo_gap <- cutree(arbre_ward, k = gap_k)
 typo_gap = data.matrix(typo_gap)
 # add columnnames
 colnames(typo_gap) = c(gap_k)
-write.table(typo_gap, file = sprintf("%s/groups_gap.tsv", opt$wd), quote = FALSE, sep = '\t', col.names = c('', gap_k))
+write.table(typo_gap, file = sprintf("%s/groups_gap.tsv", opt$wd), quote = FALSE, sep = '\t', col.names = NA)
 
 ##########
 # Get Groups by Kmean Class

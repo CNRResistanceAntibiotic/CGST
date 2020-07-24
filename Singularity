@@ -75,10 +75,10 @@ From: julia:1.4.1
 	# UPGRADE PIP
 	python3 -m pip install wheel
 	python3 -m pip install --upgrade pip
-    python3 -m pip install --upgrade setuptools
+    python3 -m pip install -U pip
+    python3 -m pip install 'setuptools==47.3.2'
 
 	# INSTALL ARIBA
-
 	# dependencies Ariba
 
 	wget -q http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/2.2.9/bowtie2-2.2.9-linux-x86_64.zip &&\
@@ -107,7 +107,7 @@ From: julia:1.4.1
 	python3 -m pip install ariba
 
 	# INSTALL R
-	apt-get install --no-install-recommends -y r-base r-base-dev
+	apt-get install --no-install-recommends -y r-base r-base-dev libcurl4-openssl-dev libnlopt-dev r-cran-car
 
 	R -e "install.packages('optparse')"
 	R -e "install.packages('questionr')"
@@ -120,15 +120,17 @@ From: julia:1.4.1
     apt-get install --no-install-recommends -y mafft
 
     # Install python dependencies
-	python3 -m pip install --upgrade pip
+	python3 -m pip install --trusted-host pypi.python.org --upgrade pip
+	python3 -m pip --version
 	python3 -m pip install certifi
 	python3 -m pip install nose
 	python3 -m pip install pillow
 	python3 -m pip install dendropy
 	python3 -m pip install biopython
+	python3 -m pip list
 
     # Install RAxML for Gubbins
-      apt-get install --no-install-recommends -y gcc pkg-config zlib1g-dev libsubunit-dev
+    apt-get install --no-install-recommends -y gcc pkg-config zlib1g-dev libsubunit-dev
 	export raxml_version='8.2.12'
 	curl -L https://github.com/stamatak/standard-RAxML/archive/v${raxml_version}.tar.gz -o standard-RAxML-${raxml_version}.tar.gz
 	tar xzf standard-RAxML-${raxml_version}.tar.gz

@@ -27,7 +27,7 @@ from shutil import rmtree
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
-from cgst.log import section_header, log_process_with_output_file, explanation, tool_error_log
+from cgst.log import section_header, log_process_with_output_file, explanation, tool_error_log, log
 from cgst.utils import read_output_mentalist
 
 
@@ -211,7 +211,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
                         val_list = groups_dict[head]
                         pivot = True
                         for i, group_d in enumerate(val_list):
-                            if row[head] in group_d["group"]:
+                            if row[head] == group_d["group"]:
                                 pivot = False
                                 if row[""] not in group_d["strains"]:
                                     str_list = group_d["strains"]
@@ -234,18 +234,23 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
         reader = DictReader(groups_file, delimiter="\t")
         headers = reader.fieldnames
         for row in reader:
-            strains_groups_list.append(row[""])
             for head in headers:
                 if head:
                     if head in groups_dict:
                         val_list = groups_dict[head]
+                        print("\n")
+                        print(val_list)
+                        print(head)
+                        print(row)
                         pivot = True
+                        print("\n")
                         for i, group_d in enumerate(val_list):
-                            if row[head] in group_d["group"]:
+                            if row[head] == group_d["group"]:
                                 pivot = False
                                 if row[""] not in group_d["strains"]:
                                     str_list = group_d["strains"]
                                     str_list.append(row[""])
+                                    print(str_list)
                                     group_d["strains"] = str_list
                                     continue
                                 else:
@@ -332,7 +337,10 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
 
     cgmlst_database_path = os.path.join(database, "cgMLST", f"{species}")
 
-    fasta_db_path = cgmlst_dir_path = ""
+    log()
+    log(cgmlst_database_path)
+
+    fasta_db_path = ""
 
     for file_1 in os.listdir(cgmlst_database_path):
         if "cgmlst-org" == file_1 or "cnr" == file_1:

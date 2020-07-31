@@ -230,33 +230,37 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
                         continue
 
     r_result_gap_file = os.path.join(combination_dir, "groups_gap.tsv")
-    with open(r_result_gap_file, "r") as groups_file:
-        reader = DictReader(groups_file, delimiter="\t")
-        headers = reader.fieldnames
-        for row in reader:
-            for head in headers:
-                if head:
-                    if head in groups_dict:
-                        val_list = groups_dict[head]
-                        pivot = True
-                        for i, group_d in enumerate(val_list):
-                            if row[head] == group_d["group"]:
-                                pivot = False
-                                if row[""] not in group_d["strains"]:
-                                    str_list = group_d["strains"]
-                                    str_list.append(row[""])
-                                    group_d["strains"] = str_list
-                                    continue
-                                else:
-                                    continue
-                        if pivot:
-                            val_list.append({"group": row[head], "strains": [row[""]]})
+    if os.path.exists(r_result_gap_file):
+        with open(r_result_gap_file, "r") as groups_file:
+            reader = DictReader(groups_file, delimiter="\t")
+            headers = reader.fieldnames
+            for row in reader:
+                for head in headers:
+                    if head:
+                        if head in groups_dict:
+                            val_list = groups_dict[head]
+                            pivot = True
+                            for i, group_d in enumerate(val_list):
+                                if row[head] == group_d["group"]:
+                                    pivot = False
+                                    if row[""] not in group_d["strains"]:
+                                        str_list = group_d["strains"]
+                                        str_list.append(row[""])
+                                        group_d["strains"] = str_list
+                                        continue
+                                    else:
+                                        continue
+                            if pivot:
+                                val_list.append({"group": row[head], "strains": [row[""]]})
+                                continue
+                            groups_dict[head] = val_list
                             continue
-                        groups_dict[head] = val_list
-                        continue
-                    else:
-                        groups_dict[head] = [{"group": row[head], "strains": [row[""]]}]
-                        continue
+                        else:
+                            groups_dict[head] = [{"group": row[head], "strains": [row[""]]}]
+                            continue
+    else:
+        log()
+        log("File of gap group not exist : ({0})".format(r_result_gap_file))
 
     strains_groups_list = list(set(strains_groups_list))
     groups_dict["1"] = [{"group": "1", "strains": strains_groups_list}]

@@ -119,6 +119,8 @@ if(gap_k >= 2){
     fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", gap_k, "clusters"))
     invisible(dev.off())
 
+} else {
+    paste("Cluster from GAP stat are too low (<2): ", gap_k)
 }
 
 

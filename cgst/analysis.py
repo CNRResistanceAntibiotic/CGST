@@ -238,19 +238,13 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
                 if head:
                     if head in groups_dict:
                         val_list = groups_dict[head]
-                        print("\n")
-                        print(val_list)
-                        print(head)
-                        print(row)
                         pivot = True
-                        print("\n")
                         for i, group_d in enumerate(val_list):
                             if row[head] == group_d["group"]:
                                 pivot = False
                                 if row[""] not in group_d["strains"]:
                                     str_list = group_d["strains"]
                                     str_list.append(row[""])
-                                    print(str_list)
                                     group_d["strains"] = str_list
                                     continue
                                 else:

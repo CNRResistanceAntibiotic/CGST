@@ -89,7 +89,7 @@ invisible(dev.off())
 #####
 # Get Dendrogram Graph
 pdf(sprintf("%s/dendrogram_with_class.pdf", opt$wd))
-plot(arbre_ward, main = paste("Dendrogram partionned (3 best inertie) - ", ndx[1],"-", ndx[2], "-", ndx[3]), xlab = "", ylab = "", sub = "", axes = FALSE, hang = - 1, cex = 0.13)
+fviz_dend(arbre_ward, main = paste("Dendrogram partionned (3 best inertie) - ", ndx[1],"-", ndx[2], "-", ndx[3]), xlab = "", ylab = "", sub = "", axes = FALSE, hang = - 1, cex = 0.13)
 legend("topright", bty = "n", legend = paste(ndx[1 : 3], " class"), text.col = c("green3", "red3", "blue3"), cex = 0.8)
 rect.hclust(arbre_ward, ndx[1], border = "green3")
 rect.hclust(arbre_ward, ndx[2], border = "red3")
@@ -100,7 +100,7 @@ if(gap_k >= 2){
     #####
     # Get Dendrogram Gap Graph
     pdf(sprintf("%s/dendrogram_with_class_gap.pdf", opt$wd))
-    fviz_dend(arbre_ward, main = paste("Dendrogram partionned with gap stat (", gap_k,"clusters)"), cex = 0.13, k = gap_k, color_labels_by_k = FALSE, rect = TRUE, lwd = 0.13)
+    print(fviz_dend(arbre_ward, main = paste("Dendrogram partionned with gap stat (", gap_k,"clusters)"), cex = 0.13, k = gap_k, color_labels_by_k = FALSE, rect = TRUE, lwd = 0.13))
     invisible(dev.off())
 
     ##########
@@ -116,7 +116,7 @@ if(gap_k >= 2){
     # Get Groups by Kmean-GAP Class
     final <- kmeans(simi_matrix, gap_k, nstart = 30)
     pdf(sprintf("%s/kmean_%s_clusters.pdf", opt$wd, gap_k))
-    fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", gap_k, "clusters"))
+    print(fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", gap_k, "clusters")))
     invisible(dev.off())
 
 } else {

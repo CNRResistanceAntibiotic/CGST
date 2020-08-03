@@ -96,33 +96,42 @@ rect.hclust(arbre_ward, ndx[2], border = "red3")
 rect.hclust(arbre_ward, ndx[3], border = "blue3")
 invisible(dev.off())
 
-if(gap_k >= 2){
-    #####
-    # Get Dendrogram Gap Graph
-    pdf(sprintf("%s/dendrogram_with_class_gap.pdf", opt$wd))
-    plot(fviz_dend(arbre_ward, main = paste("Dendrogram partionned with gap stat (", gap_k,"clusters)"), cex = 0.13, k = gap_k, color_labels_by_k = FALSE, rect = TRUE, lwd = 0.13))
-    invisible(dev.off())
-
-    ##########
-    # Get Groups by Gap Class
-    typo_gap <- cutree(arbre_ward, k = gap_k)
-    # convert to matrix format
-    typo_gap = data.matrix(typo_gap)
-    # add columnnames
-    colnames(typo_gap) = c(gap_k)
-    write.table(typo_gap, file = sprintf("%s/groups_gap.tsv", opt$wd), quote = FALSE, sep = '\t', col.names = NA)
-
-    ##########
-    # Get Groups by Kmean-GAP Class
-    final <- kmeans(simi_matrix, gap_k, nstart = 30)
-    pdf(sprintf("%s/kmean_%s_clusters.pdf", opt$wd, gap_k))
-    plot(fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", gap_k, "clusters")))
-    invisible(dev.off())
-
+if(gap_k < 2){
+    cat("Cluster from GAP stat are too low (<2): ", gap_k, "\n")
+    stop("exit")
 } else {
-    paste("Cluster from GAP stat are too low (<2): ", gap_k)
+    paste("Gap_k value is sufficient: ", gap_k)
 }
 
+#####
+# Get Dendrogram Gap Graph
+pdf(sprintf("%s/dendrogram_with_class_gap.pdf", opt$wd))
+fviz_dend(
+    arbre_ward,
+    main = paste("Dendrogram partionned with gap stat (", gap_k,"clusters)"),
+    cex = 0.13,
+    k = gap_k,
+    color_labels_by_k = FALSE,
+    rect = TRUE,
+    lwd = 0.13
+)
+invisible(dev.off())
+
+##########
+# Get Groups by Gap Class
+typo_gap <- cutree(arbre_ward, k = gap_k)
+# convert to matrix format
+typo_gap = data.matrix(typo_gap)
+# add columnnames
+colnames(typo_gap) = c(gap_k)
+write.table(typo_gap, file = sprintf("%s/groups_gap.tsv", opt$wd), quote = FALSE, sep = '\t', col.names = NA)
+
+##########
+# Get Groups by Kmean-GAP Class
+final <- kmeans(simi_matrix, gap_k, nstart = 30)
+pdf(sprintf("%s/kmean_%s_clusters.pdf", opt$wd, gap_k))
+fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", gap_k, "clusters"))
+invisible(dev.off())
 
 
 ##########

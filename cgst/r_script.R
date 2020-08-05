@@ -113,7 +113,7 @@ if(gap_k >= 2){
     #####
     # Get Dendrogram Gap Graph
     pdf(sprintf("%s/dendrogram_with_class_gap.pdf", opt$wd))
-    fviz_dend(
+    print(fviz_dend(
         arbre_ward,
         main = paste("Dendrogram partionned with gap stat (", gap_k,"clusters)"),
         cex = 0.13,
@@ -121,7 +121,7 @@ if(gap_k >= 2){
         color_labels_by_k = FALSE,
         rect = TRUE,
         lwd = 0.13
-    )
+    ))
     invisible(dev.off())
 
     ##########
@@ -137,7 +137,7 @@ if(gap_k >= 2){
     # Get Groups by Kmean-GAP Class
     final <- kmeans(simi_matrix, gap_k, nstart = 30)
     pdf(sprintf("%s/kmean_%s_clusters.pdf", opt$wd, gap_k))
-    fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", gap_k, "clusters"))
+    print(fviz_cluster(final, data = simi_matrix) + theme_minimal() + ggtitle(paste("k = ", gap_k, "clusters")))
     invisible(dev.off())
 
 } else {

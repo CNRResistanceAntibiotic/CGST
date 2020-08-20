@@ -179,7 +179,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
             shutil.move(file_path, os.path.join(intermediate_file_dir, file))
 
     # add ST in modify output_mentalist
-    add_st_to_output_mentalist(output_final, name)
+    st_dict = add_st_to_output_mentalist(output_final, name)
 
     # Statistic
     detection_result_dict = read_output_mentalist(output_final, name)
@@ -187,7 +187,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
     count_none = count_loc = count_low_cov = count_perfect = count_multi = 0
 
     for locus, value_dict in detection_result_dict.items():
-        if locus == "Sample" or locus == "ST" or locus == "clonal_complex":
+        if locus == "Sample" or locus == "ST" or locus == "clonal_complex" or locus in st_dict:
             continue
         elif value_dict[name] == "0?":
             count_none += 1
@@ -397,6 +397,7 @@ def add_st_to_output_mentalist(file_path, name):
     This function manage the addition of the ST value to MentaLiST output
     :param file_path: The output MentaLiST file path
     :param name: the name used
+    :return A dict of ST values
     """
     file_tmp_path = file_path + "_tmp"
     with open(file_tmp_path, 'w', newline='')as file_tmp:
@@ -421,6 +422,7 @@ def add_st_to_output_mentalist(file_path, name):
                 csv_writer.writerow({**row, **st_dict})
     os.remove(file_path)
     shutil.move(file_tmp_path, file_path)
+    return st_dict
 
 
 def main_detection(r1, r2, database, work_dir_path, name, species_full, force, only_mentalist, threads):

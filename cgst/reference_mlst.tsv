@@ -1,18 +1,28 @@
 Schema	Reference	Publi	Species
-mlst_acinetobacter-baumannii1	Oxford	http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=16145081	acinetobacter baumannii
+mlst_achromobacter-xylosoxidans			achromobacter xylosoxidans
+mlst_acinetobacter-baumannii1	Oxford	http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=16145081	acinetobacter baumannii|acinetobacter calcoaceticus|acinetobacter lactucae|acinetobacter pittii
 mlst_acinetobacter-baumannii2	Pasteur	http://www.ncbi.nlm.nih.gov/pubmed/20383326	acinetobacter baumannii
+mlst_aeromonas-spp			aeromonas caviae|aeromonas veronii
 mlst_brucella-melitensis			brucella melitensis
+mlst_burkholderia-complex			burkholderia cepacia|burkholderia contaminans|burkholderia lata
 mlst_clostridium-difficile			clostridioides difficile
+mlst_citrobacter-freundii			citrobacter braakii|citrobacter europaeus|citrobacter freundii|citrobacter portucalensis|citrobacter youngae
+mlst_cronobacter-spp			cronobacter malonaticus
+mlst_enterobacter-cloacae			enterobacter asburiae|enterobacter bugandensis|enterobacter chengduensis|enterobacter chengduensis-like|enterobacter cloacae|enterobacter hormaechei|enterobacter kobei|enterobacter ludwigii|enterobacter roggenkampii
 mlst_enterococcus-faecalis	Oxford	http://www.ncbi.nlm.nih.gov/pubmed/12037049	enterococcus faecalis
 mlst_enterococcus-faecium	Oxford	http://www.ncbi.nlm.nih.gov/pubmed/12037049	enterococcus faecium
-mlst_escherichia-coli1	Achtman		escherichia coli|shigella sonnei
-mlst_escherichia-coli2	Pasteur		escherichia coli|shigella sonnei
+mlst_escherichia-coli1	Achtman		escherichia coli|shigella sonnei|shigella flexneri
+mlst_escherichia-coli2	Pasteur		escherichia coli|shigella sonnei|shigella flexneri
 mlst_ftularensis			francisella tularensis
 mlst_klebsiella-aerogenes	CNR		klebsiella aerogenes
 mlst_klebsiella-pneumoniae	Pasteur		klebsiella pneumoniae|klebsiella quasipneumoniae|klebsiella variicola
+mlst_klebsiella-oxytoca			klebsiella oxytoca
 mlst_legionella-pneumophila			legionella pneumophila
 mlst_listeria-monocytogenes			listeria monocytogenes
 mlst_mycobacterium-tuberculosis			mycobacterium tuberculosis|mycobacterium bovis|mycobacterium africanum|mycobacterium canettii
 mlst_mycoplasma-gallisepticum			mycoplasma gallisepticum
+mlst_pseudomonas-aeruginosa			pseudomonas aeruginosa
+mlst_pseudomonas-putida			pseudomonas monteilii|pseudomonas mosselii|pseudomonas putida|pseudomonas soli
 mlst_staphylococcus-aureus	Oxford		staphylococcus aureus
 mlst_salmonella-enterica	Enterobase		salmonella enterica
+mlst_staphylococcus-aureus 			staphylococcus aureus

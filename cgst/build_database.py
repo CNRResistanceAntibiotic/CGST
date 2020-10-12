@@ -107,8 +107,6 @@ def build_database_mentalist(cgst_database_path, species_full, threads):
         database_name = f"{species}_cgmlst.db"
         database_path = os.path.join(cgmlst_species_database_path, database_name)
 
-
-
         cmd = f"{exe} download_cgmlst -k 31 -o {fasta_database_path} -s {id_species_list[0].lower()} --db {database_path}" \
               f" --threads {threads}"
 

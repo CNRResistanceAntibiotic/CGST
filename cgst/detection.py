@@ -159,7 +159,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
         ###################################
         # check MentaLiST output for Novel and Multiple Votes
         section_header(f'Check MentaLiST Output : Round {i}')
-        explanation('Check MentaLiST output for Novel Votes')
+        explanation('Check MentaLiST output for Novel Votes and edit false novel in previous output')
         check_mentalist_output(fasta_novel_st, output, fasta_db_path)
 
     ###################################
@@ -360,7 +360,7 @@ def check_mentalist_output(fasta_novel_st, output, fasta_db_path):
                 if "N" in value:
                     if locus in false_novel_allele_dict:
                         # change to the true allele
-                        output_corrected_dict[locus] = false_novel_allele_dict[locus]
+                        output_corrected_dict[locus] = false_novel_allele_dict[locus].split("_")[-1]
                     else:
                         output_corrected_dict[locus] = value
                         continue

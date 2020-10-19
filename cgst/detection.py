@@ -35,7 +35,6 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
     :param species_full: The scientific name of the strain
     :param threads: The number of threads to allocate
     """
-    i = 1
     kmer_threshold = 5
     kmer_build = 31
 
@@ -47,233 +46,247 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
     exe_update = shutil.which("update_fasta_db.py")
 
     cgmlst_database_path = os.path.join(database, "cgMLST", f"{species}")
-
     fasta_db_path = db_path = cgmlst_dir_path = ""
-    output_final = os.path.join(work_dir_path, f"{name}_output_final")
+    cg_db_dict = {}
 
     for file_1 in os.listdir(cgmlst_database_path):
-        if "cgmlst-org" == file_1 or "cnr" == file_1:
-            cgmlst_dir_path = os.path.join(cgmlst_database_path, file_1)
-            db_path = os.path.join(cgmlst_dir_path, f"{species}_cgmlst.db")
+        file_1_path = os.path.join(cgmlst_database_path, file_1)
+        if os.path.isdir(file_1_path):
+            cgmlst_dir_path = file_1_path
             for file_2 in os.listdir(cgmlst_dir_path):
                 file_2_path = os.path.join(cgmlst_dir_path, file_2)
+                db_path = os.path.join(cgmlst_dir_path, f"{species}_cgmlst.db")
                 if ".db" in file_2 and "_fasta" not in file_2 and not os.path.isdir(file_2_path):
                     db_path = file_2_path
                 elif ".db" not in file_2 and "_fasta" in file_2 and os.path.isdir(file_2_path):
                     fasta_db_path = file_2_path
+        cg_db_dict[file_1] = {'db_path': db_path, 'fasta_db_path': fasta_db_path}
 
-    # If the kmer index database do not exist -> create it
-    if not os.path.exists(db_path):
-        ###################################
-        # Run MentaLiST Build DB
-        section_header('Create MentaLiST Database')
-        explanation('Before run a detection MentaLiST need to construct his own kmer-index database')
-        # prepare
-        cmd = f"{exe} build_db --db {db_path} -k {kmer_build} -d {fasta_db_path} --threads {threads}"
-        log_message = f"Command used : \n {cmd}"
-        # launch
-        log_file_path = os.path.join(work_dir_path, "logBuildDB.txt")
-        process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
-        log_process_with_output_file(process, log_message, log_file_path)
+    # make detection on each core-genome available for the species
+    for name_db, value_hash in cg_db_dict.items():
+        i = 1
+        db_path = value_hash["db_path"]
+        fasta_db_path = value_hash["fasta_db_path"]
+        section_header('Launch MentaLiST:')
+        explanation('Name Database  : {0}'.format(name_db))
+        explanation('Database Path : {0}'.format(db_path))
+        explanation('Fasta Path : {0}'.format(fasta_db_path))
+        output_final = os.path.join(work_dir_path, f"{name}_{name_db}_output_final")
 
-    ###################################
-    # Run MentaLiST call
-    section_header(f'Run MentaLiST Call : Round {i}')
-    explanation('MentaLiST Detection ')
-    # prepare
-    output = os.path.join(work_dir_path, f"output_mentalist_{i}")
-    cmd = f"{exe} call --db {db_path} --output_votes -o {output} -1 {r1} -2 {r2} --kt {kmer_threshold}"
-    log_message = f"Command used : \n {cmd}\n"
-    # launch
-    process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
-    log_file_path = os.path.join(work_dir_path, f"logMentaLiST_{i}.txt")
-    log_process_with_output_file(process, log_message, log_file_path)
-    fasta_novel_st = os.path.join(work_dir_path, f"output_mentalist_{i}.novel.fa")
-
-    while os.path.exists(fasta_novel_st) and os.stat(fasta_novel_st).st_size != 0:
-        ###################################
-        # check MentaLiST output for Novel and Multiple Votes
-        section_header(f'Check MentaLiST Output : Round {i}')
-        explanation('Check MentaLiST output for Novel Votes')
-        check_mentalist_output(fasta_novel_st, output, fasta_db_path)
-
-        ###################################
-        # Run MentaLiST Parse Novel Fasta
-        section_header(f'Run MentaLiST parse novel fasta : Round {i}')
-        explanation('MentaLiST parse new novel variant ')
-        # prepare
-        fasta_novel_st = os.path.join(work_dir_path, f"output_mentalist_{i}.novel.fa")
-        result_parse_path = os.path.join(work_dir_path, f"all_novel_alleles_{i}")
-        cmd = f"{exe_parse} -f {fasta_novel_st} -o {result_parse_path}"
-        log_message = f"Command used : \n {cmd}\n"
-        # launch
-        process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
-        log_file_path = os.path.join(work_dir_path, f"logParseNovelAlleles_{i}.txt")
-        log_process_with_output_file(process, log_message, log_file_path)
-
-        ###################################
-        # Run MentaLiST Update Fasta DB
-        section_header(f'Run MentaLiST update DB fasta : Round {i}')
-        explanation('MentaLiST update DB fasta with new novel variant ')
-        # prepare
-        result_parse_path = os.path.join(work_dir_path, f"all_novel_alleles_{i}")
-        cmd = f"{exe_update} -db {fasta_db_path} -n {result_parse_path}.fa"
-        log_message = f"Command used : \n {cmd}\n"
-        # launch
-        process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
-        log_file_path = os.path.join(work_dir_path, f"logCreateNewSchemeWithNovel_{i}.txt")
-        log_process_with_output_file(process, log_message, log_file_path)
-
-        ###################################
-        # Run MentaLiST Build DB
-        section_header(f'Create MentaLiST Database : Round {i}')
-        explanation('Before run a detection MentaLiST need to construct his own kmer-index database')
-        # prepare
-        cmd = f"{exe} build_db --db {db_path} -k {kmer_build} -d {fasta_db_path} --threads {threads}"
-        log_message = f"Command used : \n {cmd}"
-        # remove previous db
-        os.remove(db_path)
-        # launch
-        log_file_path = os.path.join(work_dir_path, f"logBuildDB_{i}.txt")
-        process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
-        log_process_with_output_file(process, log_message, log_file_path)
-
-        ###################################
-        # Update counter
-        i += 1
+        # If the kmer index database do not exist -> create it
+        if not os.path.exists(db_path):
+            ###################################
+            # Run MentaLiST Build DB
+            section_header('Create MentaLiST Database')
+            explanation('Before run a detection MentaLiST need to construct his own kmer-index database')
+            # prepare
+            cmd = f"{exe} build_db --db {db_path} -k {kmer_build} -d {fasta_db_path} --threads {threads}"
+            log_message = f"Command used : \n {cmd}"
+            # launch
+            log_file_path = os.path.join(work_dir_path, "logBuildDB_{0}.txt".format(name_db))
+            process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
+            log_process_with_output_file(process, log_message, log_file_path)
 
         ###################################
         # Run MentaLiST call
         section_header(f'Run MentaLiST Call : Round {i}')
         explanation('MentaLiST Detection ')
         # prepare
-        output = os.path.join(work_dir_path, f"output_mentalist_{i}")
+        output = os.path.join(work_dir_path, f"output_mentalist_{name_db}_{i}")
         cmd = f"{exe} call --db {db_path} --output_votes -o {output} -1 {r1} -2 {r2} --kt {kmer_threshold}"
         log_message = f"Command used : \n {cmd}\n"
         # launch
         process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
-        log_file_path = os.path.join(work_dir_path, f"logMentaLiST_{i}.txt")
+        log_file_path = os.path.join(work_dir_path, f"logMentaLiST_{name_db}_{i}.txt")
         log_process_with_output_file(process, log_message, log_file_path)
         fasta_novel_st = os.path.join(work_dir_path, f"output_mentalist_{i}.novel.fa")
 
+        while os.path.exists(fasta_novel_st) and os.stat(fasta_novel_st).st_size != 0:
+            ###################################
+            # check MentaLiST output for Novel and Multiple Votes
+            section_header(f'Check MentaLiST Output : Round {i}')
+            explanation('Check MentaLiST output for Novel Votes')
+            check_mentalist_output(fasta_novel_st, output, fasta_db_path)
+
+            ###################################
+            # Run MentaLiST Parse Novel Fasta
+            section_header(f'Run MentaLiST parse novel fasta : Round {i}')
+            explanation('MentaLiST parse new novel variant ')
+            # prepare
+            fasta_novel_st = os.path.join(work_dir_path, f"output_mentalist_{name_db}_{i}.novel.fa")
+            result_parse_path = os.path.join(work_dir_path, f"all_novel_alleles_{name_db}_{i}")
+            cmd = f"{exe_parse} -f {fasta_novel_st} -o {result_parse_path}"
+            log_message = f"Command used : \n {cmd}\n"
+            # launch
+            process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+            log_file_path = os.path.join(work_dir_path, f"logParseNovelAlleles_{name_db}_{i}.txt")
+            log_process_with_output_file(process, log_message, log_file_path)
+
+            ###################################
+            # Run MentaLiST Update Fasta DB
+            section_header(f'Run MentaLiST update DB fasta : Round {i}')
+            explanation('MentaLiST update DB fasta with new novel variant ')
+            # prepare
+            result_parse_path = os.path.join(work_dir_path, f"all_novel_alleles_{name_db}_{i}")
+            cmd = f"{exe_update} -db {fasta_db_path} -n {result_parse_path}.fa"
+            log_message = f"Command used : \n {cmd}\n"
+            # launch
+            process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+            log_file_path = os.path.join(work_dir_path, f"logCreateNewSchemeWithNovel_{name_db}_{i}.txt")
+            log_process_with_output_file(process, log_message, log_file_path)
+
+            ###################################
+            # Run MentaLiST Build DB
+            section_header(f'Create MentaLiST Database : Round {i}')
+            explanation('Before run a detection MentaLiST need to construct his own kmer-index database')
+            # prepare
+            cmd = f"{exe} build_db --db {db_path} -k {kmer_build} -d {fasta_db_path} --threads {threads}"
+            log_message = f"Command used : \n {cmd}"
+            # remove previous db
+            os.remove(db_path)
+            # launch
+            log_file_path = os.path.join(work_dir_path, f"logBuildDB_{name_db}_{i}.txt")
+            process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
+            log_process_with_output_file(process, log_message, log_file_path)
+
+            ###################################
+            # Update counter
+            i += 1
+
+            ###################################
+            # Run MentaLiST call
+            section_header(f'Run MentaLiST Call : Round {i}')
+            explanation('MentaLiST Detection ')
+            # prepare
+            output = os.path.join(work_dir_path, f"output_mentalist_{name_db}_{i}")
+            cmd = f"{exe} call --db {db_path} --output_votes -o {output} -1 {r1} -2 {r2} --kt {kmer_threshold}"
+            log_message = f"Command used : \n {cmd}\n"
+            # launch
+            process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
+            log_file_path = os.path.join(work_dir_path, f"logMentaLiST_{name_db}_{i}.txt")
+            log_process_with_output_file(process, log_message, log_file_path)
+            fasta_novel_st = os.path.join(work_dir_path, f"output_mentalist_{name_db}_{i}.novel.fa")
+
+            ###################################
+            # check MentaLiST output for Novel and Multiple Votes
+            section_header(f'Check MentaLiST Output : Round {i}')
+            explanation('Check MentaLiST output for Novel Votes and edit false novel in previous output')
+            check_mentalist_output(fasta_novel_st, output, fasta_db_path)
+
         ###################################
-        # check MentaLiST output for Novel and Multiple Votes
-        section_header(f'Check MentaLiST Output : Round {i}')
-        explanation('Check MentaLiST output for Novel Votes and edit false novel in previous output')
-        check_mentalist_output(fasta_novel_st, output, fasta_db_path)
+        # Process final result
+        section_header('Process Final Output')
 
-    ###################################
-    # Process final result
-    section_header('Process Final Output')
+        # final files
+        shutil.move(output, output_final)
+        intermediate_file_dir = os.path.join(work_dir_path, "intermediate_files")
 
-    # final files
-    shutil.move(output, output_final)
-    intermediate_file_dir = os.path.join(work_dir_path, "intermediate_files")
+        if not os.path.exists(intermediate_file_dir):
+            os.mkdir(intermediate_file_dir)
 
-    if not os.path.exists(intermediate_file_dir):
-        os.mkdir(intermediate_file_dir)
+        for file in os.listdir(work_dir_path):
+            file_path = os.path.join(work_dir_path, file)
+            if not os.path.isdir(file_path):
+                if not ("_output_final" in file or "statistics_" in file):
+                    shutil.move(file_path, os.path.join(intermediate_file_dir, file))
 
-    for file in os.listdir(work_dir_path):
-        file_path = os.path.join(work_dir_path, file)
-        if file != f"{name}_output_final" and os.path.isfile(file_path):
-            shutil.move(file_path, os.path.join(intermediate_file_dir, file))
+        # add ST in modify output_mentalist
+        st_dict = add_st_to_output_mentalist(output_final, name)
 
-    # add ST in modify output_mentalist
-    st_dict = add_st_to_output_mentalist(output_final, name)
+        # Statistic
+        detection_result_dict = read_output_mentalist(output_final, name)
 
-    # Statistic
-    detection_result_dict = read_output_mentalist(output_final, name)
+        count_none = count_loc = count_low_cov = count_perfect = count_multi = 0
 
-    count_none = count_loc = count_low_cov = count_perfect = count_multi = 0
+        for locus, value_dict in detection_result_dict.items():
+            if locus == "Sample" or locus == "ST" or locus == "clonal_complex" or locus in st_dict:
+                continue
+            elif value_dict[name] == "0?":
+                count_none += 1
+                count_loc += 1
+            elif "-" in value_dict[name]:
+                count_low_cov += 1
+                count_loc += 1
+            elif "+" in value_dict[name]:
+                count_multi += 1
+                count_loc += 1
+            else:
+                count_perfect += 1
+                count_loc += 1
 
-    for locus, value_dict in detection_result_dict.items():
-        if locus == "Sample" or locus == "ST" or locus == "clonal_complex" or locus in st_dict:
-            continue
-        elif value_dict[name] == "0?":
-            count_none += 1
-            count_loc += 1
-        elif "-" in value_dict[name]:
-            count_low_cov += 1
-            count_loc += 1
-        elif "+" in value_dict[name]:
-            count_multi += 1
-            count_loc += 1
+        explanation(f'Total Locus'
+                    f' : {count_loc}')
+        explanation(f'Perfect Locus'
+                    f' : {count_perfect} -> {round((count_perfect / count_loc * 100), 2)}% of total locus')
+        explanation(f'Multiple Locus'
+                    f' : {count_multi} -> {round((count_multi / count_loc * 100), 2)}% of total locus')
+        explanation(f'Low Coverage Locus'
+                    f' : {count_low_cov} -> {round((count_low_cov / count_loc * 100), 2)}% of total locus')
+        explanation(f'None Locus'
+                    f' : {count_none} -> {round((count_none / count_loc * 100), 2)}% of total locus')
+        stats_file = os.path.join(work_dir_path, "statistics_{0}.tsv".format(name_db))
+
+        with open(stats_file, "w") as output_file:
+            csv_writer = writer(output_file, delimiter="\t")
+            csv_writer.writerow(["Total Locus", count_loc])
+            csv_writer.writerow(["Resume", "Count", "Percentage on Total locus"])
+            csv_writer.writerow(["Perfect Locus", count_perfect, (count_perfect / count_loc * 100)])
+            csv_writer.writerow(["Multiple Locus", count_multi, (count_multi / count_loc * 100)])
+            csv_writer.writerow(["Low Coverage Locus", count_low_cov, (count_low_cov / count_loc * 100)])
+            csv_writer.writerow(["None Locus", count_none, (count_none / count_loc * 100)])
+
+        # Load Known Combination
+        known_comb_path = os.path.join(cgmlst_dir_path, "combination_{0}_list.tsv".format(name_db))
+
+        known_comb_dict = {}
+
+        if os.path.exists(known_comb_path):
+            with open(known_comb_path, "r") as file:
+                reader = DictReader(file, delimiter="\t")
+                for row in reader:
+                    known_comb_dict[row["Name"]] = row["Combination"]
         else:
-            count_perfect += 1
-            count_loc += 1
+            explanation(f"combination file not found for {species_full} at {known_comb_path}")
 
-    explanation(f'Total Locus'
-                f' : {count_loc}')
-    explanation(f'Perfect Locus'
-                f' : {count_perfect} -> {round((count_perfect / count_loc * 100), 2)}% of total locus')
-    explanation(f'Multiple Locus'
-                f' : {count_multi} -> {round((count_multi / count_loc * 100), 2)}% of total locus')
-    explanation(f'Low Coverage Locus'
-                f' : {count_low_cov} -> {round((count_low_cov / count_loc * 100), 2)}% of total locus')
-    explanation(f'None Locus'
-                f' : {count_none} -> {round((count_none / count_loc * 100), 2)}% of total locus')
-    stats_file = os.path.join(work_dir_path, "statistics.tsv")
+        # Search For Known Combination
+        final_file_path = os.path.join(work_dir_path, f"{name}_{name_db}_output_final")
 
-    with open(stats_file, "w") as output_file:
-        csv_writer = writer(output_file, delimiter="\t")
-        csv_writer.writerow(["Total Locus", count_loc])
-        csv_writer.writerow(["Resume", "Count", "Percentage on Total locus"])
-        csv_writer.writerow(["Perfect Locus", count_perfect, (count_perfect / count_loc * 100)])
-        csv_writer.writerow(["Multiple Locus", count_multi, (count_multi / count_loc * 100)])
-        csv_writer.writerow(["Low Coverage Locus", count_low_cov, (count_low_cov / count_loc * 100)])
-        csv_writer.writerow(["None Locus", count_none, (count_none / count_loc * 100)])
+        detection_result_dict = read_output_mentalist(final_file_path, name)
 
-    # Load Known Combination
-    known_comb_path = os.path.join(cgmlst_dir_path, "combination_list.tsv")
+        comb_strain_list = []
 
-    known_comb_dict = {}
-
-    if os.path.exists(known_comb_path):
-        with open(known_comb_path, "r") as file:
-            reader = DictReader(file, delimiter="\t")
-            for row in reader:
-                known_comb_dict[row["Name"]] = row["Combination"]
-    else:
-        explanation(f"combination file not found for {species_full} at {known_comb_path}")
-
-    # Search For Known Combination
-    final_file_path = os.path.join(work_dir_path, f"{name}_output_final")
-
-    detection_result_dict = read_output_mentalist(final_file_path, name)
-
-    comb_strain_list = []
-
-    for locus, sample_dict in detection_result_dict.items():
-        if locus == "Sample":
-            continue
-        else:
-            if "-" not in sample_dict[name] and "+" not in sample_dict[name] and "0" != sample_dict[name] and \
-                    "?" not in sample_dict[name]:
-                comb_strain_list.append(f"{locus}:{sample_dict[name]}")
-    if known_comb_dict:
-        # search for each known combination
-        combine_result_file = os.path.join(work_dir_path, "combination_result.tsv")
-        with open(combine_result_file, "w") as combine_file:
-            csv_writer = writer(combine_file, delimiter="\t")
-            csv_writer.writerow(["Combination Name", "Count Reference Locus", "Count Sample Locus", "Ratio", "Comment"])
-            for name_comb, combs in known_comb_dict.items():
-                combination_known = combs.split(",")
-                result = list(set(comb_strain_list).intersection(combination_known))
-                ratio = round((len(result) / len(combination_known)) * 100, 2)
-                if ratio == 100:
-                    comment = "Perfect"
-                elif ratio >= 98:
-                    comment = "Very Close"
-                elif ratio >= 90:
-                    comment = "Close"
-                elif ratio >= 80:
-                    comment = "Like"
-                elif ratio >= 70:
-                    comment = "Close Like"
-                else:
-                    comment = "No relevant"
-                csv_writer.writerow([name_comb, len(combination_known), len(result), ratio, comment])
-    section_header('Finish')
+        for locus, sample_dict in detection_result_dict.items():
+            if locus == "Sample":
+                continue
+            else:
+                if "-" not in sample_dict[name] and "+" not in sample_dict[name] and "0" != sample_dict[name] and \
+                        "?" not in sample_dict[name]:
+                    comb_strain_list.append(f"{locus}:{sample_dict[name]}")
+        if known_comb_dict:
+            # search for each known combination
+            combine_result_file = os.path.join(work_dir_path, f"combination_result_{name_db}.tsv")
+            with open(combine_result_file, "w") as combine_file:
+                csv_writer = writer(combine_file, delimiter="\t")
+                csv_writer.writerow(["Combination Name", "Count Reference Locus", "Count Sample Locus", "Ratio", "Comment"])
+                for name_comb, combs in known_comb_dict.items():
+                    combination_known = combs.split(",")
+                    result = list(set(comb_strain_list).intersection(combination_known))
+                    ratio = round((len(result) / len(combination_known)) * 100, 2)
+                    if ratio == 100:
+                        comment = "Perfect"
+                    elif ratio >= 98:
+                        comment = "Very Close"
+                    elif ratio >= 90:
+                        comment = "Close"
+                    elif ratio >= 80:
+                        comment = "Like"
+                    elif ratio >= 70:
+                        comment = "Close Like"
+                    else:
+                        comment = "No relevant"
+                    csv_writer.writerow([name_comb, len(combination_known), len(result), ratio, comment])
+        section_header('Finish {0} Coregenome Analysis'.format(name_db))
+    section_header('Finish ALL CoreGenome Analysis')
 
 
 def ariba_detection(r1, r2, database, work_dir_path, name, species_full):

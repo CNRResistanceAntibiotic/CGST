@@ -266,7 +266,8 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
             combine_result_file = os.path.join(work_dir_path, f"combination_result_{name_db}.tsv")
             with open(combine_result_file, "w") as combine_file:
                 csv_writer = writer(combine_file, delimiter="\t")
-                csv_writer.writerow(["Combination Name", "Count Reference Locus", "Count Sample Locus", "Ratio", "Comment"])
+                csv_writer.writerow(["Combination Name", "Count Reference Locus", "Count Sample Locus", "Ratio",
+                                     "Comment"])
                 for name_comb, combs in known_comb_dict.items():
                     combination_known = combs.split(",")
                     result = list(set(comb_strain_list).intersection(combination_known))

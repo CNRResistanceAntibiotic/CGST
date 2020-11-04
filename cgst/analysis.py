@@ -99,7 +99,8 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
             pivot = False
             for sample_name in sample_list:
                 if "-" in sample_dict[sample_name] or "+" in sample_dict[sample_name] \
-                        or "0" == sample_dict[sample_name] or "?" in sample_dict[sample_name]:
+                        or "0" == sample_dict[sample_name] or "?" in sample_dict[sample_name]\
+                        or "N" in sample_dict[sample_name]:
                     pivot = True
                     break
                 else:

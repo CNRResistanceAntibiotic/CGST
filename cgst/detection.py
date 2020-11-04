@@ -55,11 +55,10 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
             cgmlst_dir_path = file_1_path
             for file_2 in os.listdir(cgmlst_dir_path):
                 file_2_path = os.path.join(cgmlst_dir_path, file_2)
-                db_path = os.path.join(cgmlst_dir_path, f"{species}_cgmlst.db")
-                if ".db" in file_2 and "_fasta" not in file_2 and not os.path.isdir(file_2_path):
-                    db_path = file_2_path
-                elif ".db" not in file_2 and "_fasta" in file_2 and os.path.isdir(file_2_path):
+                if "_fasta" in file_2 and os.path.isdir(file_2_path):
                     fasta_db_path = file_2_path
+                    db_name = file_2.split("_fasta")[0]+".db"
+                    db_path = os.path.join(cgmlst_dir_path, db_name)
         cg_db_dict[file_1] = {'db_path': db_path, 'fasta_db_path': fasta_db_path}
 
     # make detection on each core-genome available for the species

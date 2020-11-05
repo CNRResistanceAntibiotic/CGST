@@ -67,9 +67,33 @@ ndx <- sort(order(l, decreasing = T)[1 : 3])
 
 ####
 # get gap cluster
-disi_matrix_gap <- scale(disi_matrix)
-gap_stat <- clusGap(disi_matrix_gap, FUN = kmeans, nstart = 30, K.max = 24, B = 200)
-gap_k = maxSE(f = gap_stat$Tab[, "gap"], SE.f = gap_stat$Tab[, "SE.sim"])
+gap_k = 0
+tryCatch(
+    expr = {
+        disi_matrix_gap <- scale(disi_matrix)
+        gap_stat <- clusGap(disi_matrix_gap, FUN = kmeans, nstart = 30, K.max = 24, B = 200)
+        gap_k = maxSE(f = gap_stat$Tab[, "gap"], SE.f = gap_stat$Tab[, "SE.sim"])
+
+        #########
+        # Get Gap Graph
+        pdf(sprintf("%s/gap_statistics.pdf", opt$wd))
+        fviz_gap_stat(gap_stat) + theme_minimal() + ggtitle("fviz_gap_stat: Gap Statistic")
+        invisible(dev.off())
+    },
+    error = function(e){
+        print("Error in GAP statistics")
+        print(e)
+    },
+    warning = function(w){
+        # (Optional)
+        # Do this if an warning is caught...
+    },
+    finally = {
+        # (Optional)
+        # Do this at the end before quitting the tryCatch structure...
+    }
+)
+
 
 #########
 # Get Inertie Graph
@@ -77,12 +101,6 @@ pdf(sprintf("%s/inertial_graph.pdf", opt$wd))
 plot(inertie[1 : n], type = "s", xlab = "Number of class", ylab = "Inertia", main = sprintf("Inertial Graph (3 best inertia)", ndx[1], ndx[2], ndx[3]),)
 points(c(ndx[1], ndx[2], ndx[3]), inertie[c(ndx[1], ndx[2], ndx[3])], col = c("green3", "red3", "blue3"), cex = 2, lwd = 3)
 legend("topright", bty = "n", legend = paste(ndx[1 : 3], " class"), text.col = c("green3", "red3", "blue3"), cex = 0.8)
-invisible(dev.off())
-
-#########
-# Get Gap Graph
-pdf(sprintf("%s/gap_statistics.pdf", opt$wd))
-fviz_gap_stat(gap_stat) + theme_minimal() + ggtitle("fviz_gap_stat: Gap Statistic")
 invisible(dev.off())
 
 

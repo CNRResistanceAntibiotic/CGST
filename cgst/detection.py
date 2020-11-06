@@ -186,7 +186,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
         for file in os.listdir(work_dir_path):
             file_path = os.path.join(work_dir_path, file)
             if not os.path.isdir(file_path):
-                if not ("_output_final" in file or "statistics_" in file or "combination_result_"):
+                if not ("_output_final" in file or "statistics_" in file or "combination_result_" in file):
                     shutil.move(file_path, os.path.join(intermediate_file_dir, file))
 
         # add ST in modify output_mentalist

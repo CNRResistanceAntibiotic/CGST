@@ -235,7 +235,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
             csv_writer.writerow(["None Locus", count_none, (count_none / count_loc * 100)])
 
         # Load Known Combination
-        known_comb_path = os.path.join(os.apth.dirname(db_path), "combination_{0}_list.tsv".format(name_db))
+        known_comb_path = os.path.join(os.path.dirname(db_path), "combination_{0}_list.tsv".format(name_db))
 
         known_comb_dict = {}
 

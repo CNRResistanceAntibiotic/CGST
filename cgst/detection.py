@@ -255,12 +255,10 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
         comb_strain_list = []
 
         for locus, sample_dict in detection_result_dict.items():
-            if locus == "Sample":
+            if locus == "Sample" or locus == "ST" or locus == "clonal_complex":
                 continue
             else:
-                if "-" not in sample_dict[name] and "+" not in sample_dict[name] and "0" != sample_dict[name] and \
-                        "?" not in sample_dict[name]:
-                    comb_strain_list.append(f"{locus}:{sample_dict[name]}")
+                comb_strain_list.append(f"{locus}:{sample_dict[name]}")
         if known_comb_dict:
             # search for each known combination
             combine_result_file = os.path.join(work_dir_path, f"combination_result_{name_db}.tsv")

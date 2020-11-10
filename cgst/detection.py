@@ -98,7 +98,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
         process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, executable='/bin/bash')
         log_file_path = os.path.join(work_dir_path, f"logMentaLiST_{name_db}_{i}.txt")
         log_process_with_output_file(process, log_message, log_file_path)
-        fasta_novel_st = os.path.join(work_dir_path, f"output_mentalist_{i}.novel.fa")
+        fasta_novel_st = os.path.join(work_dir_path, f"output_mentalist_{name_db}_{i}.novel.fa")
 
         while os.path.exists(fasta_novel_st) and os.stat(fasta_novel_st).st_size != 0:
             ###################################

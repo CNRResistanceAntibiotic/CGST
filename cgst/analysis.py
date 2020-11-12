@@ -342,7 +342,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     fasta_db_path = ""
 
     for file_1 in os.listdir(cgmlst_database_path):
-        if "cgmlst-org" == file_1 or "cnr" == file_1:
+        if "cgmlst-org" == file_1 or "cnr" == file_1 or "other" == file_1:
             cgmlst_dir_path = os.path.join(cgmlst_database_path, file_1)
             for file_2 in os.listdir(cgmlst_dir_path):
                 file_2_path = os.path.join(cgmlst_dir_path, file_2)

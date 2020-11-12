@@ -46,7 +46,7 @@ def mentalist_detection(r1, r2, database, work_dir_path, name, species_full, thr
     exe_update = shutil.which("update_fasta_db.py")
 
     cgmlst_database_path = os.path.join(database, "cgMLST", f"{species}")
-    fasta_db_path = db_path = cgmlst_dir_path = ""
+    fasta_db_path = db_path = ""
     cg_db_dict = {}
 
     for file_1 in os.listdir(cgmlst_database_path):

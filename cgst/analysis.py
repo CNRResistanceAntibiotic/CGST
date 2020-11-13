@@ -337,9 +337,9 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     cgmlst_database_path = os.path.join(database, "cgMLST", f"{species}")
 
     log()
-    log(cgmlst_database_path)
+    log("CGST MLST path : {0}".format(cgmlst_database_path))
 
-    fasta_db_path = ""
+    fasta_db_path_list = []
 
     for file_1 in os.listdir(cgmlst_database_path):
         if "cgmlst-org" == file_1 or "cnr" == file_1 or "other" == file_1:
@@ -347,7 +347,7 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
             for file_2 in os.listdir(cgmlst_dir_path):
                 file_2_path = os.path.join(cgmlst_dir_path, file_2)
                 if ".db" not in file_2 and "_fasta" in file_2 and os.path.isdir(file_2_path):
-                    fasta_db_path = file_2_path
+                    fasta_db_path_list.append(file_2_path)
 
     output_dir_msa = os.path.join(phylotree_dir, "msa")
     if not os.path.exists(output_dir_msa):
@@ -359,22 +359,19 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
     pivot_first_loop = True
     sequence_dict = {}
     final_resume_aln_dict = {}
-    count_locus_cg = 0
-    for file in os.listdir(fasta_db_path):
-        if ".fasta" in file:
-            count_locus_cg += 1
 
     output_aln_file_list = []
-
     pool = multiprocessing.Pool(processes=int(threads))
     list_jobs = []
-
+    fasta_db_path_used = ""
     for locus_name, sample_dict in detection_result_only_diff_dict.items():
         fasta_file = ""
-        for file in os.listdir(fasta_db_path):
-            if file == f"{locus_name}.fasta":
-                fasta_file = os.path.join(fasta_db_path, f"{locus_name}.fasta")
-                break
+        for fasta_db_path in fasta_db_path_list:
+            for file in os.listdir(fasta_db_path):
+                if file == f"{locus_name}.fasta":
+                    fasta_db_path_used = fasta_db_path
+                    fasta_file = os.path.join(fasta_db_path, f"{locus_name}.fasta")
+                    break
         output_fasta_file = os.path.join(output_dir_msa, os.path.basename(fasta_file))
         with open(output_fasta_file, "w") as output_fasta:
             record_dict = SeqIO.index(fasta_file, "fasta")
@@ -383,23 +380,24 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
                 seq.id = sample_name
                 SeqIO.write(seq, output_fasta, "fasta")
             record_dict.close()
-
         ###################################
         # MAFFT - MSA
         output_aln_file = os.path.join(output_dir_msa, f"{os.path.basename(fasta_file).split('.')[0]}.aln")
         output_aln_file_list.append(output_aln_file)
-
         list_jobs.append([output_dir_msa, output_fasta_file, locus_name, output_aln_file])
 
-    pool.starmap(mafft, list_jobs)
+    count_locus_cg = 0
+    for file in os.listdir(fasta_db_path_used):
+        if ".fasta" in file:
+            count_locus_cg += 1
 
+    pool.starmap(mafft, list_jobs)
     stop = 0
     for output_aln_file in output_aln_file_list:
         ###################################
         # EXPLOIT OUTPUT MAFFT
         with open(output_aln_file, "r") as handle:
             record_aln_dict = SeqIO.to_dict(SeqIO.parse(handle, "fasta"))
-
         for id_seq in sorted(record_aln_dict, key=lambda id_s: len(record_aln_dict[id_s].seq), reverse=True):
             if pivot_first_loop:
                 start = 1
@@ -407,14 +405,14 @@ def main_analysis(detection_dir, database, work_dir, species_full, force, thread
             else:
                 start = stop + 1
                 stop = start + len(record_aln_dict[id_seq].seq)
-            final_resume_aln_dict[record_aln_dict[id_seq].description.split(" ")[-1]] = {"start": start, "stop": stop, "length": stop - start}
+            final_resume_aln_dict[record_aln_dict[id_seq].description.split(" ")[-1]] = {"start": start, "stop": stop,
+                                                                                         "length": stop - start}
             break
         for sample in sample_list:
             if sample in sequence_dict:
                 sequence = sequence_dict[sample]
                 if sample not in record_aln_dict:
                     sequence = sequence + "-" * final_resume_aln_dict[record_aln_dict[sample].description.split(" ")[-1]]["length"]
-
                 else:
                     sequence = sequence + record_aln_dict[sample].seq
                 sequence_dict[sample] = sequence
